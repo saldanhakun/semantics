@@ -11,7 +11,7 @@
 namespace Saldanhakun\Semantics\Enum;
 
 use LogicException;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Saldanhakun\Semantics\Validator\EnumValidator;
 
 abstract class BaseEnum
 {
@@ -32,7 +32,7 @@ abstract class BaseEnum
 
     protected static function readFromProxy(): array
     {
-        throw new EnumException(\sprintf('%s: Opções não declaradas', static::class));
+        throw EnumException::undeclaredError(static::class, 'readFromProxy');
     }
 
     /**
@@ -107,34 +107,10 @@ abstract class BaseEnum
      */
     final public static function describe(string $key): string
     {
-        self::validate($key);
         $keys = self::all();
+        $valid = EnumValidator::assert(static::class, $key, true);
 
-        return $keys[$key];
-    }
-
-    /**
-     * Validação do valor, conforme a lista de chaves aceitas.
-     * A assinatura é compatível com o CallbackConstraint, sinalizando erros no contexto da validação.
-     * Também é possível gerar LogicException passando apenas o valor para validação, sem contexto.
-     * @param string|null $key
-     * @param ExecutionContextInterface|null $context
-     * @param mixed $payload
-     * @return void
-     * @throws LogicException
-     */
-    public static function validate(?string $key, ?ExecutionContextInterface $context = null, $payload = null): void
-    {
-        $keys = self::all();
-        if (!\array_key_exists($key, $keys)) {
-            if ($context === null) {
-                throw new LogicException(\sprintf('%s: key "%s" not allowed', static::class, $key));
-            } else {
-                $context
-                    ->buildViolation('Valor {{ key }} não reconhecido.', ['{{ key }}' => $key])
-                    ->addViolation();
-            }
-        }
+        return $keys[$valid];
     }
 
     /**
@@ -195,11 +171,11 @@ abstract class BaseEnum
      */
     final public static function instanceOrString(?string $key, bool $asString): static|string|null
     {
-        if ($asString || $key === null) {
-            return $key;
-        } else {
-            return self::instance($key);
+        $valid = EnumValidator::assert(static::class, $key, false);
+        if ($valid) {
+            return self::instance($valid);
         }
+        return null;
     }
 
     /**
@@ -209,23 +185,12 @@ abstract class BaseEnum
      */
     final public static function assert(mixed $value): string
     {
-        $self = \get_called_class();
-        if ($value instanceof $self) {
-            return $value->getKey();
-        } else {
-            self::validate($value);
-
-            return $value;
-        }
+        return EnumValidator::assert(static::class, $value, true);
     }
 
     final public static function assertOrNull($value): ?string
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return self::assert($value);
+        return EnumValidator::assert(static::class, $value, false);
     }
 
     final public static function assertArray(?array $list, bool $allowNull): array
@@ -239,7 +204,7 @@ abstract class BaseEnum
         }
         $list = array_unique($list);
         if (empty($list) && !$allowNull) {
-            throw new LogicException('Values must be non-empty');
+            throw EnumException::requiredError(static::class);
         }
 
         return $list;
@@ -253,7 +218,7 @@ abstract class BaseEnum
     final public static function isValid(string $key): bool
     {
         try {
-            self::validate($key);
+            EnumValidator::assert(static::class, $key, true);
 
             return true;
         } catch (\Exception $e) {
@@ -275,4 +240,5 @@ abstract class BaseEnum
     {
         return $this->name;
     }
+
 }
