@@ -2,9 +2,9 @@
 
 namespace Saldanhakun\Semantics\Tests\src\Enum;
 
-use Saldanhakun\Semantics\Enum\Attribute\EnumColorTrait;
+use Saldanhakun\Semantics\Data\Attribute\EnumColorTrait;
 
-class ColoredFiveEnum extends SimpleFiveEnum
+class ColoredFiveEnum extends SimpleFiveEnumValue
 {
     use EnumColorTrait;
 }

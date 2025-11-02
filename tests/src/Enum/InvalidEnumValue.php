@@ -10,15 +10,9 @@
 
 namespace Saldanhakun\Semantics\Tests\src\Enum;
 
-use Saldanhakun\Semantics\Enum\BaseEnum;
+use Saldanhakun\Semantics\Data\Abstract\AbstractEnumValue;
 
-class ProxiedEnum extends BaseEnum
+class InvalidEnumValue extends AbstractEnumValue
 {
-    protected static function readFromProxy(): array
-    {
-        return [
-            'nine' => 'This is Nine',
-            'ten' => 'This is Ten',
-        ];
-    }
+    public const NOT_OPTIONS = 'the constant name is wrong here';
 }

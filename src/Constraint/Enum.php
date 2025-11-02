@@ -10,7 +10,7 @@
 
 namespace Saldanhakun\Semantics\Constraint;
 
-use Saldanhakun\Semantics\Enum\BaseEnum;
+use Saldanhakun\Semantics\Data\Abstract\AbstractEnumValue;
 use Saldanhakun\Semantics\Validator\EnumValidator;
 use Symfony\Component\Validator\Attribute\HasNamedArguments;
 use Symfony\Component\Validator\Constraint;
@@ -57,7 +57,7 @@ class Enum extends Constraint
         if (!class_exists($enumClass)) {
             throw new InvalidArgumentException(\sprintf("Enum class '%s' is not declared. Maybe a missing bundle or dependency?", $enumClass));
         }
-        if (!is_subclass_of($enumClass, BaseEnum::class, true)) {
+        if (!is_subclass_of($enumClass, AbstractEnumValue::class, true)) {
             throw new InvalidArgumentException(\sprintf("Enum class '%s' is not an actual BaseEnum descendant.", $enumClass));
         }
         parent::__construct($options, $groups, $payload);

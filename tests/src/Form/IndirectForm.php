@@ -10,7 +10,7 @@
 
 namespace Saldanhakun\Semantics\Tests\src\Form;
 
-use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnum;
+use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnumValue;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -28,7 +28,7 @@ class IndirectForm extends AbstractType
         $builder->add('field', ChoiceType::class, [
             'label' => 'Enum Field',
             'required' => true,
-            'choices' => SimpleFiveEnum::choices(),
+            'choices' => SimpleFiveEnumValue::choices(),
         ]);
     }
 }

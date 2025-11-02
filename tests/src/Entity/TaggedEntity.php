@@ -11,7 +11,7 @@
 namespace Saldanhakun\Semantics\Tests\src\Entity;
 
 use Saldanhakun\Semantics\Constraint\Enum;
-use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnum;
+use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnumValue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -21,7 +21,7 @@ class TaggedEntity
     #[Required]
     public string $name = '';
 
-    #[Enum(SimpleFiveEnum::class)]
+    #[Enum(SimpleFiveEnumValue::class)]
     #[Required]
     public string $enum = 'one';
 
@@ -32,7 +32,7 @@ class TaggedEntity
 
     public function getExpanded(): string
     {
-        $enum = SimpleFiveEnum::instance($this->enum);
+        $enum = SimpleFiveEnumValue::instance($this->enum);
 
         return \sprintf('My name is %s and %s', $this->name, $enum->getName());
     }

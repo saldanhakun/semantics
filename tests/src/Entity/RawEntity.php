@@ -10,7 +10,7 @@
 
 namespace Saldanhakun\Semantics\Tests\src\Entity;
 
-use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnum;
+use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnumValue;
 
 class RawEntity
 {
@@ -24,7 +24,7 @@ class RawEntity
 
     public function getExpanded(): string
     {
-        $enum = SimpleFiveEnum::instance($this->enum);
+        $enum = SimpleFiveEnumValue::instance($this->enum);
 
         return \sprintf('My name is %s and %s', $this->name, $enum->getName());
     }

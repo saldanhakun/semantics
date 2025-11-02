@@ -11,8 +11,8 @@
 namespace Saldanhakun\Semantics\Validator;
 
 use Saldanhakun\Semantics\Constraint\Enum;
-use Saldanhakun\Semantics\Enum\BaseEnum;
-use Saldanhakun\Semantics\Enum\EnumException;
+use Saldanhakun\Semantics\Data\Abstract\AbstractEnumValue;
+use Saldanhakun\Semantics\Data\ValueException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\Required;
@@ -30,7 +30,7 @@ class EnumValidator extends ConstraintValidator
             $source = [$constraint->enumClass, $constraint->source];
             $baseName = explode('\\', $constraint->enumClass);
             if (!\is_callable($source)) {
-                $this->context->buildViolation(EnumException::DEFAULT_MESSAGES[EnumException::ERR_UNDECLARED])
+                $this->context->buildViolation(ValueException::DEFAULT_MESSAGES[ValueException::ERR_UNDECLARED_ENUM])
                     ->setParameter('{{ class }}', array_pop($baseName))
                     ->setParameter('{{ source }}', $constraint->source)
                     ->addViolation();
@@ -39,12 +39,12 @@ class EnumValidator extends ConstraintValidator
             }
             $choices = \call_user_func($source);
             if ($constraint->lookIntoKeys && !\array_key_exists($value, $choices)) {
-                $this->context->buildViolation(EnumException::DEFAULT_MESSAGES[EnumException::ERR_UNKNOWN])
+                $this->context->buildViolation(ValueException::DEFAULT_MESSAGES[ValueException::ERR_UNKNOWN_ENUM])
                     ->setParameter('{{ class }}', array_pop($baseName))
                     ->setParameter('{{ value }}', $value)
                     ->addViolation();
             } elseif (!$constraint->lookIntoKeys && !\in_array($value, $choices)) {
-                $this->context->buildViolation(EnumException::DEFAULT_MESSAGES[EnumException::ERR_UNKNOWN])
+                $this->context->buildViolation(ValueException::DEFAULT_MESSAGES[ValueException::ERR_UNKNOWN_ENUM])
                     ->setParameter('{{ class }}', array_pop($baseName))
                     ->setParameter('{{ value }}', $value)
                     ->addViolation();
@@ -64,7 +64,7 @@ class EnumValidator extends ConstraintValidator
         }
         $result = $context->validate($value, $constraints);
         if ($result->count() > 0) {
-            throw new EnumException($result->get(0)->getMessage(), EnumException::ERR_GENERIC);
+            throw new ValueException($result->get(0)->getMessage(), ValueException::ERR_GENERIC);
         }
     }
 
@@ -72,17 +72,17 @@ class EnumValidator extends ConstraintValidator
     {
         if (empty($value)) {
             if ($required) {
-                throw EnumException::requiredError($class);
+                throw ValueException::requiredError();
             }
 
             return null;
         }
-        if ($value instanceof BaseEnum) {
+        if ($value instanceof AbstractEnumValue) {
             return $value->getKey();
         }
         $value = \strval($value);
         if (!\array_key_exists($value, \call_user_func([$class, 'all']))) {
-            throw EnumException::unknownError($class, $value);
+            throw ValueException::unknownEnumError($class, $value);
         }
 
         return $value;

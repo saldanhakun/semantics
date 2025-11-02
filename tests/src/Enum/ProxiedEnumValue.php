@@ -10,15 +10,15 @@
 
 namespace Saldanhakun\Semantics\Tests\src\Enum;
 
-use Saldanhakun\Semantics\Enum\BaseEnum;
+use Saldanhakun\Semantics\Data\Abstract\AbstractEnumValue;
 
-class SimpleFiveEnum extends BaseEnum
+class ProxiedEnumValue extends AbstractEnumValue
 {
-    public const OPTIONS = [
-        'one' => 'This is One',
-        'two' => 'This is Two',
-        'three' => 'This is Three',
-        'four' => 'This is Four',
-        'five' => 'This is Five',
-    ];
+    protected static function readFromProxy(): array
+    {
+        return [
+            'nine' => 'This is Nine',
+            'ten' => 'This is Ten',
+        ];
+    }
 }

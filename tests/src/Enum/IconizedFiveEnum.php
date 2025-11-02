@@ -2,9 +2,9 @@
 
 namespace Saldanhakun\Semantics\Tests\src\Enum;
 
-use Saldanhakun\Semantics\Enum\Attribute\EnumIconTrait;
+use Saldanhakun\Semantics\Data\Attribute\EnumIconTrait;
 
-class IconizedFiveEnum extends SimpleFiveEnum
+class IconizedFiveEnum extends SimpleFiveEnumValue
 {
     use EnumIconTrait;
 }

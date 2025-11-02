@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Saldanhakun\Semantics\Enum\Attribute;
+namespace Saldanhakun\Semantics\Data\Attribute;
 
 trait EnumIconTrait
 {

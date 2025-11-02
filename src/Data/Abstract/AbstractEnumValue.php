@@ -8,31 +8,23 @@
  * file that was distributed with this source code.
  */
 
-namespace Saldanhakun\Semantics\Enum;
+namespace Saldanhakun\Semantics\Data\Abstract;
 
 use LogicException;
+use Saldanhakun\Semantics\Data\ValueException;
 use Saldanhakun\Semantics\Validator\EnumValidator;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
-abstract class BaseEnum
+abstract class AbstractEnumValue extends AbstractValue
 {
-    /***
-     * No mínimo, a classe precisa definir a lista de opções:
-     * public const array OPTIONS = [ 'str1' => "String 1", ...];
-     */
 
-    protected static function _read_constant(string $constantName, mixed $default = null): mixed
+    protected mixed $value;
+
+    public function configureOptions(OptionsResolver $resolver): OptionsResolver
     {
-        $constName = \sprintf('%s::%s', static::class, strtoupper($constantName));
-        if (\defined($constName)) {
-            return \constant($constName);
-        }
-
-        return $default;
-    }
-
-    protected static function readFromProxy(): array
-    {
-        throw EnumException::undeclaredError(static::class, 'readFromProxy');
+        return parent::configureOptions($resolver)
+            ->setDefault('available_terms', null)
+            ->setAllowedTypes('available_terms', ['null', 'array']);
     }
 
     /**
@@ -56,7 +48,7 @@ abstract class BaseEnum
         return $options;
     }
 
-    /** @return BaseEnum[] */
+    /** @return AbstractEnumValue[] */
     final public static function allInstances(bool $alphabetical): array
     {
         $instances = $alphabetical ? self::alphabetical() : self::all();
@@ -145,8 +137,9 @@ abstract class BaseEnum
      * @param string $key
      * @param string $name
      */
-    final protected function __construct(private readonly string $key, private readonly string $name)
+    final protected function __construct(private readonly string $key, private readonly string $name, array $options=[])
     {
+        parent::__construct($options);
     }
 
     /**
@@ -208,26 +201,10 @@ abstract class BaseEnum
         }
         $list = array_unique($list);
         if (empty($list) && !$allowNull) {
-            throw EnumException::requiredError(static::class);
+            throw ValueException::requiredError(static::class);
         }
 
         return $list;
-    }
-
-    /**
-     * Checks if value is expected by the enum
-     * @param string $key
-     * @return bool
-     */
-    final public static function isValid(string $key): bool
-    {
-        try {
-            EnumValidator::assert($key, static::class, true);
-
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
     }
 
     public function __toString(): string
@@ -243,5 +220,10 @@ abstract class BaseEnum
     public function getName(): string
     {
         return $this->name;
+    }
+
+    protected function validate(): void
+    {
+        EnumValidator::assert($this->key, static::class, false);
     }
 }

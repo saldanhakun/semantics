@@ -11,7 +11,7 @@
 namespace Saldanhakun\Semantics\Tests\src\Form;
 
 use Saldanhakun\Semantics\Form\EnumFormType;
-use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnum;
+use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnumValue;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -28,7 +28,7 @@ class DirectForm extends AbstractType
         $builder->add('field', EnumFormType::class, [
             'label' => 'Enum Field',
             'required' => true,
-            'enum_class' => SimpleFiveEnum::class,
+            'enum_class' => SimpleFiveEnumValue::class,
         ]);
     }
 }

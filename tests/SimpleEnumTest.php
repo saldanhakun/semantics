@@ -11,13 +11,13 @@
 namespace Saldanhakun\Semantics\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Saldanhakun\Semantics\Enum\EnumException;
+use Saldanhakun\Semantics\Data\ValueException;
 use Saldanhakun\Semantics\Tests\src\Entity\EnrichedEntity;
 use Saldanhakun\Semantics\Tests\src\Entity\RawEntity;
 use Saldanhakun\Semantics\Tests\src\Entity\TaggedEntity;
-use Saldanhakun\Semantics\Tests\src\Enum\InvalidEnum;
-use Saldanhakun\Semantics\Tests\src\Enum\ProxiedEnum;
-use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnum;
+use Saldanhakun\Semantics\Tests\src\Enum\InvalidEnumValue;
+use Saldanhakun\Semantics\Tests\src\Enum\ProxiedEnumValue;
+use Saldanhakun\Semantics\Tests\src\Enum\SimpleFiveEnumValue;
 use Saldanhakun\Semantics\Tests\src\Form\DirectForm;
 use Saldanhakun\Semantics\Tests\src\Form\EnrichedEntityType;
 use Saldanhakun\Semantics\Tests\src\Form\IndirectForm;
@@ -40,7 +40,7 @@ class SimpleEnumTest extends TestCase
 
     public function testOptions(): void
     {
-        $options = SimpleFiveEnum::all();
+        $options = SimpleFiveEnumValue::all();
         $this->assertCount(5, $options);
         $this->assertArrayHasKey('one', $options);
         $this->assertArrayHasKey('two', $options);
@@ -49,59 +49,59 @@ class SimpleEnumTest extends TestCase
         $this->assertArrayHasKey('five', $options);
         $this->assertSame('This is Three', $options['three']);
 
-        $expanded = SimpleFiveEnum::allWithKeys();
+        $expanded = SimpleFiveEnumValue::allWithKeys();
         $this->assertCount(\count($options), $expanded);
         foreach ($expanded as $key => $str) {
             $this->assertArrayHasKey($key, $options);
             $this->assertTrue(str_contains($str, $key) && str_contains($str, $options[$key]));
         }
 
-        $two = SimpleFiveEnum::instanceOrString('two', false);
+        $two = SimpleFiveEnumValue::instanceOrString('two', false);
         $this->assertNotNull($two);
         $this->assertSame('This is Two', $two->getName());
         $this->assertSame('two', $two->getKey());
-        $anotherTwo = SimpleFiveEnum::instance('two');
+        $anotherTwo = SimpleFiveEnumValue::instance('two');
         $this->assertSame($two, $anotherTwo);
 
         $this->assertSame(
-            array_keys(SimpleFiveEnum::all()),
-            array_values(SimpleFiveEnum::choices())
+            array_keys(SimpleFiveEnumValue::all()),
+            array_values(SimpleFiveEnumValue::choices())
         );
     }
 
     public function testValidation(): void
     {
-        $this->assertNull(SimpleFiveEnum::assertOrNull(null));
-        $this->assertNull(SimpleFiveEnum::assertOrNull(''));
+        $this->assertNull(SimpleFiveEnumValue::assertOrNull(null));
+        $this->assertNull(SimpleFiveEnumValue::assertOrNull(''));
         $this->assertException(function () {
-            SimpleFiveEnum::assert('');
-        }, EnumException::ERR_REQUIRED);
+            SimpleFiveEnumValue::assert('');
+        }, ValueException::ERR_REQUIRED);
         $this->assertNotException(function () {
-            SimpleFiveEnum::assert('two');
+            SimpleFiveEnumValue::assert('two');
         });
         $this->assertException(function () {
-            SimpleFiveEnum::assert('six');
-        }, EnumException::ERR_UNKNOWN);
+            SimpleFiveEnumValue::assert('six');
+        }, ValueException::ERR_UNKNOWN_ENUM);
         $this->assertException(function () {
-            InvalidEnum::assert('something');
-        }, EnumException::ERR_UNDECLARED);
+            InvalidEnumValue::assert('something');
+        }, ValueException::ERR_UNDECLARED_ENUM);
         $this->assertNotException(function () {
-            ProxiedEnum::assert('ten');
+            ProxiedEnumValue::assert('ten');
         });
     }
 
     public function testConstraint(): void
     {
         $this->assertNotException(function () {
-            EnumValidator::validateOutsideContext(SimpleFiveEnum::all(), 'four', false);
+            EnumValidator::validateOutsideContext(SimpleFiveEnumValue::all(), 'four', false);
         });
         $this->assertNotException(function () {
-            EnumValidator::validateOutsideContext(SimpleFiveEnum::all(), null, false);
-            EnumValidator::validateOutsideContext(SimpleFiveEnum::all(), '', false);
+            EnumValidator::validateOutsideContext(SimpleFiveEnumValue::all(), null, false);
+            EnumValidator::validateOutsideContext(SimpleFiveEnumValue::all(), '', false);
         });
         $this->assertException(function () {
-            EnumValidator::validateOutsideContext(SimpleFiveEnum::all(), 'four', false);
-        }, EnumException::ERR_GENERIC);
+            EnumValidator::validateOutsideContext(SimpleFiveEnumValue::all(), 'four', false);
+        }, ValueException::ERR_GENERIC);
     }
 
     public function testDirectForm(): void
@@ -190,7 +190,7 @@ class SimpleEnumTest extends TestCase
             $callback();
             $this->fail(\sprintf('%s: erro esperado não ocorreu', $messageContext));
         } catch (\Exception $error) {
-            if ($error instanceof EnumException) {
+            if ($error instanceof ValueException) {
                 $this->assertTrue(
                     $exceptionCode === null || $exceptionCode === $error->getCode(),
                     \sprintf('%s: erro diferente do esperado (%s): %s', $messageContext, \get_class($error), $error->getMessage())
