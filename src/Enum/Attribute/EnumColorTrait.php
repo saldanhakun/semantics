@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Brazilian Validators package,
+ * This file is part of the Semantics package,
  * created by Marcelo Saldanha (marcelosaldanha.com.br)
  *
  * For the full copyright and license information, please view the LICENSE
@@ -24,11 +24,6 @@ trait EnumColorTrait
 
     public static function colors(): ?array
     {
-        $list = null;
-        if (\defined(static::class . '::COLORS')) {
-            $list = static::COLORS;
-        }
-
-        return $list;
+        return self::_read_constant('COLORS', []);
     }
 }

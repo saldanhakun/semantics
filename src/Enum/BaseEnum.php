@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Brazilian Validators package,
+ * This file is part of the Semantics package,
  * created by Marcelo Saldanha (marcelosaldanha.com.br)
  *
  * For the full copyright and license information, please view the LICENSE
@@ -42,7 +42,7 @@ abstract class BaseEnum
     {
         $keys = self::_read_constant('OPTIONS');
         if (empty($keys)) {
-            $keys = self::readFromProxy();
+            $keys = static::readFromProxy();
         }
 
         return $keys;
@@ -108,7 +108,7 @@ abstract class BaseEnum
     final public static function describe(string $key): string
     {
         $keys = self::all();
-        $valid = EnumValidator::assert(static::class, $key, true);
+        $valid = EnumValidator::assert($key, static::class, true);
 
         return $keys[$valid];
     }
@@ -145,18 +145,18 @@ abstract class BaseEnum
      * @param string $key
      * @param string $name
      */
-    protected function __construct(private readonly string $key, private readonly string $name)
+    final protected function __construct(private readonly string $key, private readonly string $name)
     {
     }
 
     /**
      * Retorna um valor instanciado para a chave (cache global automático)
      * @param string $key
-     * @return self
+     * @return static
      */
-    final public static function instance(string $key): self
+    final public static function instance(string $key): static
     {
-        if (!\array_key_exists($key, self::$cache)) {
+        if (!\array_key_exists($key, static::$cache)) {
             self::$cache[$key] = new static($key, self::describe($key));
         }
 
@@ -167,14 +167,18 @@ abstract class BaseEnum
      * Retorna uma instância ou a própria chave, conforme desejado. Útil para implementar get() flexíveis na Entidade.
      * @param string|null $key
      * @param bool $asString
-     * @return self|string|null
+     * @return static|string|null
      */
     final public static function instanceOrString(?string $key, bool $asString): static|string|null
     {
-        $valid = EnumValidator::assert(static::class, $key, false);
+        $valid = EnumValidator::assert($key, static::class, false);
         if ($valid) {
+            if ($asString) {
+                return $valid;
+            }
             return self::instance($valid);
         }
+
         return null;
     }
 
@@ -185,12 +189,12 @@ abstract class BaseEnum
      */
     final public static function assert(mixed $value): string
     {
-        return EnumValidator::assert(static::class, $value, true);
+        return EnumValidator::assert($value, static::class, true);
     }
 
     final public static function assertOrNull($value): ?string
     {
-        return EnumValidator::assert(static::class, $value, false);
+        return EnumValidator::assert($value, static::class, false);
     }
 
     final public static function assertArray(?array $list, bool $allowNull): array
@@ -218,7 +222,7 @@ abstract class BaseEnum
     final public static function isValid(string $key): bool
     {
         try {
-            EnumValidator::assert(static::class, $key, true);
+            EnumValidator::assert($key, static::class, true);
 
             return true;
         } catch (\Exception $e) {
@@ -240,5 +244,4 @@ abstract class BaseEnum
     {
         return $this->name;
     }
-
 }

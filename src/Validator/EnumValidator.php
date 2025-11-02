@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Brazilian Validators package,
+ * This file is part of the Semantics package,
  * created by Marcelo Saldanha (marcelosaldanha.com.br)
  *
  * For the full copyright and license information, please view the LICENSE
@@ -21,32 +21,30 @@ use Symfony\Component\Validator\Validation;
 
 class EnumValidator extends ConstraintValidator
 {
-
     /**
      * {@inheritdoc}
      */
     public function validate($value, Constraint $constraint): void
     {
-        /* @var Enum $constraint */
-        if (!empty($value)) {
+        if ($constraint instanceof Enum && !empty($value)) {
             $source = [$constraint->enumClass, $constraint->source];
             $baseName = explode('\\', $constraint->enumClass);
-            if (!is_callable($source)) {
-                $this->context->buildViolation(EnumException::ERR_UNDECLARED)
+            if (!\is_callable($source)) {
+                $this->context->buildViolation(EnumException::DEFAULT_MESSAGES[EnumException::ERR_UNDECLARED])
                     ->setParameter('{{ class }}', array_pop($baseName))
                     ->setParameter('{{ source }}', $constraint->source)
                     ->addViolation();
+
                 return;
             }
-            $choices = call_user_func($source);
-            if ($constraint->lookInKeys && !array_key_exists($value, $choices)) {
-                $this->context->buildViolation(EnumException::ERR_UNKNOWN)
+            $choices = \call_user_func($source);
+            if ($constraint->lookIntoKeys && !\array_key_exists($value, $choices)) {
+                $this->context->buildViolation(EnumException::DEFAULT_MESSAGES[EnumException::ERR_UNKNOWN])
                     ->setParameter('{{ class }}', array_pop($baseName))
                     ->setParameter('{{ value }}', $value)
                     ->addViolation();
-            }
-            elseif (!$constraint->lookInKeys && !in_array($value, $choices)) {
-                $this->context->buildViolation(EnumException::ERR_UNKNOWN)
+            } elseif (!$constraint->lookIntoKeys && !\in_array($value, $choices)) {
+                $this->context->buildViolation(EnumException::DEFAULT_MESSAGES[EnumException::ERR_UNKNOWN])
                     ->setParameter('{{ class }}', array_pop($baseName))
                     ->setParameter('{{ value }}', $value)
                     ->addViolation();
@@ -56,8 +54,11 @@ class EnumValidator extends ConstraintValidator
 
     public static function validateOutsideContext(array $acceptable, mixed $value, bool $required): void
     {
+        if (empty($value) && !$required) {
+            return;
+        }
         $context = Validation::createValidator();
-        $constraints = [new Choice($acceptable)];
+        $constraints = [new Choice([], array_flip($acceptable))];
         if ($required) {
             $constraints[] = new Required();
         }
@@ -70,17 +71,20 @@ class EnumValidator extends ConstraintValidator
     public static function assert(mixed $value, string $class, bool $required): ?string
     {
         if (empty($value)) {
-            if ($required) throw EnumException::requiredError($class);
+            if ($required) {
+                throw EnumException::requiredError($class);
+            }
+
             return null;
         }
         if ($value instanceof BaseEnum) {
             return $value->getKey();
         }
-        $value = strval($value);
-        if (!array_key_exists($value, call_user_func([$class, 'all']))) {
-            throw EnumException::unknownError($class, EnumException::ERR_GENERIC);
+        $value = \strval($value);
+        if (!\array_key_exists($value, \call_user_func([$class, 'all']))) {
+            throw EnumException::unknownError($class, $value);
         }
+
         return $value;
     }
-
 }

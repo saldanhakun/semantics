@@ -44,7 +44,14 @@
 	},
 	"scripts": {
 		"phpstan": [
-			"vendor/bin/phpstan analyse src/ --level=5"
+			"vendor/bin/phpstan analyse src/ tests/ --level=5"
+		],
+		"phpunit": [
+			"vendor/bin/phpunit tests/"
+		],
+		"tests": [
+			"vendor/bin/phpstan analyse src/ tests/ --level=5",
+			"vendor/bin/phpunit tests/"
 		],
 		"cs": [
 			"vendor/bin/php-cs-fixer fix --dry-run --show-progress=bar --format=@auto,txt"

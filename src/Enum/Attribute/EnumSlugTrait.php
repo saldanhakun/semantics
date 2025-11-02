@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the Brazilian Validators package,
+ * This file is part of the Semantics package,
  * created by Marcelo Saldanha (marcelosaldanha.com.br)
  *
  * For the full copyright and license information, please view the LICENSE
@@ -41,9 +41,8 @@ trait EnumSlugTrait
 
     final public static function slugs(?SluggerInterface $slugger = null): array
     {
-        if (\defined(static::class . '::SLUGS')) {
-            $list = static::SLUGS;
-        } else {
+        $list = self::_read_constant('SLUGS', false);
+        if ($list === false) {
             $list = self::all();
             foreach ($list as $key => $text) {
                 $list[$key] = self::_slugify($text, $slugger);
